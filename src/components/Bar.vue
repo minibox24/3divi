@@ -1,6 +1,6 @@
 <template>
   <div class="bar">
-    <span class="title">3divi</span>
+    <span class="title">3DIVI</span>
     <div class="win-button win-min" @click="min">
       <svg width="12" height="12" viewBox="0 0 12 12">
         <rect fill="white" width="10" height="1" x="1" y="6"></rect>
