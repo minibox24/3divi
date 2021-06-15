@@ -35,6 +35,7 @@ export default {
   font-family: "Noto Sans KR", sans-serif;
   overflow: hidden;
   height: 100vh;
+  user-select: none;
 }
 
 .view {
