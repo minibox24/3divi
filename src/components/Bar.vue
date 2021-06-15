@@ -1,12 +1,12 @@
 <template>
   <div class="bar">
     <span class="title">3divi</span>
-    <div class="win-button win-min">
+    <div class="win-button win-min" @click="min">
       <svg width="12" height="12" viewBox="0 0 12 12">
         <rect fill="white" width="10" height="1" x="1" y="6"></rect>
       </svg>
     </div>
-    <div class="win-button win-max">
+    <div class="win-button win-max" @click="max">
       <svg width="12" height="12" viewBox="0 0 12 12">
         <rect
           width="9"
@@ -18,7 +18,7 @@
         ></rect>
       </svg>
     </div>
-    <div class="win-button win-close">
+    <div class="win-button win-close" @click="close">
       <svg width="12" height="12" viewBox="0 0 12 12">
         <polygon
           fill="white"
@@ -28,6 +28,28 @@
     </div>
   </div>
 </template>
+
+<script>
+import { remote } from "electron";
+
+const currentWindow = remote.getCurrentWindow();
+
+export default {
+  methods: {
+    close() {
+      currentWindow.close();
+    },
+    min() {
+      currentWindow.minimize();
+    },
+    max() {
+      if (currentWindow.isMaximized()) currentWindow.unmaximize();
+      else currentWindow.maximize();
+    },
+  },
+};
+</script>
+
 
 <style scoped>
 .bar {
