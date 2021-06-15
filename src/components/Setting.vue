@@ -1,5 +1,6 @@
 <template>
   <div class="setting">
+    <img class="back" src="../assets/back.svg" @click="back" />
     <video class="preview" ref="video" controls @loadedmetadata="meta" />
     <div class="control">
       <div>
@@ -35,6 +36,9 @@ export default {
     };
   },
   methods: {
+    back() {
+      this.$emit("back");
+    },
     meta() {
       const video = this.$refs.video;
       const width = video.videoWidth;
@@ -60,7 +64,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .setting {
   height: 100%;
@@ -70,7 +73,15 @@ export default {
   align-items: center;
 }
 
+.back {
+  position: fixed;
+  top: 35px;
+  left: 10px;
+  padding: 0.5rem;
+}
+
 .preview {
+  margin-top: -2rem;
   background: black;
   width: 640px;
   height: 360px;

@@ -2,7 +2,7 @@
   <div class="content">
     <Main v-if="page === 0" @start="start" />
     <Select v-if="page === 1" @upload="upload" />
-    <Setting v-if="page === 2" @render="render" :file="file" />
+    <Setting v-if="page === 2" @render="render" @back="start" :file="file" />
   </div>
 </template>
 
@@ -34,7 +34,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .content {
