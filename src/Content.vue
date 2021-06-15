@@ -1,14 +1,21 @@
 <template>
   <div class="content">
-    <Main @start="start" />
+    <Main v-if="page === 0" @start="start" />
+    <Select v-if="page === 1" />
   </div>
 </template>
 
 <script>
 import Main from "./components/Main.vue";
+import Select from "./components/Select.vue";
 
 export default {
-  components: { Main },
+  components: { Main, Select },
+  data() {
+    return {
+      page: 1,
+    };
+  },
   methods: {
     start() {
       alert("start");
