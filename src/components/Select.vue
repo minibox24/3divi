@@ -69,7 +69,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .select {
   height: 100%;

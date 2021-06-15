@@ -50,7 +50,6 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .bar {
   -webkit-app-region: drag;
