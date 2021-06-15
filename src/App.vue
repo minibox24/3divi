@@ -1,20 +1,16 @@
 <template>
   <div id="app">
     <Bar />
-    <div class="view">
-      <span style="font-size: 2rem; font-weight: 700">안녕하세요 세상</span>
-    </div>
+    <Content />
   </div>
 </template>
 
 <script>
 import Bar from "./components/Bar.vue";
+import Content from "./Content.vue";
 
 export default {
-  name: "App",
-  components: {
-    Bar,
-  },
+  components: { Bar, Content },
 };
 </script>
 
@@ -36,14 +32,5 @@ export default {
   overflow: hidden;
   height: 100vh;
   user-select: none;
-}
-
-.view {
-  height: 100%;
-  background: #333333;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 </style>
