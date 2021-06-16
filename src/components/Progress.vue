@@ -5,7 +5,6 @@
       <b-progress-bar :value="value" :label="`${(value / 2).toFixed(2)}%`" />
     </b-progress>
     <span class="mt-1">예상 소요 시간 {{ eta }}</span>
-    <video ref="video" controls />
   </div>
 </template>
 
@@ -43,9 +42,7 @@ export default {
     });
 
     ipcRenderer.on("done", (evt, payload) => {
-      const blob = new Blob([payload], { type: "video/mp4" });
-      console.log(blob);
-      this.$refs.video.src = URL.createObjectURL(blob);
+      this.$emit('complete', new Blob([payload], { type: "video/mp4" }))
     });
 
     const { width, height, x, y } = this.config;

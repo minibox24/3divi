@@ -9,6 +9,7 @@
       :file="file"
       :config="config"
     />
+    <Complete v-if="page === 4" @back="start" :blob="blob" />
   </div>
 </template>
 
@@ -17,14 +18,16 @@ import Main from "./components/Main.vue";
 import Select from "./components/Select.vue";
 import Setting from "./components/Setting.vue";
 import Progress from "./components/Progress.vue";
+import Complete from "./components/Complete.vue";
 
 export default {
-  components: { Main, Select, Setting, Progress },
+  components: { Main, Select, Setting, Progress, Complete },
   data() {
     return {
       page: 0,
       file: null,
       config: null,
+      blob: null,
     };
   },
   methods: {
@@ -39,8 +42,9 @@ export default {
       this.config = config;
       this.page = 3;
     },
-    complete() {
-      alert("end");
+    complete(blob) {
+      this.blob = blob;
+      this.page = 4;
     },
   },
 };
