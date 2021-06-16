@@ -5,7 +5,7 @@
     <Setting v-if="page === 2" @render="render" @back="start" :file="file" />
     <Progress
       v-if="page === 3"
-      @complate="complate"
+      @complete="complete"
       :file="file"
       :config="config"
     />
@@ -39,7 +39,7 @@ export default {
       this.config = config;
       this.page = 3;
     },
-    complate() {
+    complete() {
       alert("end");
     },
   },
