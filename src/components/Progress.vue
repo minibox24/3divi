@@ -42,13 +42,14 @@ export default {
     });
 
     ipcRenderer.on("done", (evt, payload) => {
-      this.$emit('complete', new Blob([payload], { type: "video/mp4" }))
+      this.$emit("complete", new Blob([payload], { type: "video/mp4" }));
     });
 
-    const { width, height, x, y } = this.config;
+    const { path, width, height, x, y } = this.config;
 
     ipcRenderer.send("render", {
-      path: this.file.path,
+      inputPath: this.file.path,
+      outputPath: path,
       width,
       height,
       x,

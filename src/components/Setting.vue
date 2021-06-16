@@ -25,6 +25,8 @@
 </template>
 
 <script>
+import { ipcRenderer } from "electron";
+
 export default {
   props: ["file"],
   data() {
@@ -50,16 +52,22 @@ export default {
       this.y = 0;
     },
     render() {
+      ipcRenderer.send("openDialog");
+    },
+  },
+  mounted() {
+    this.$refs.video.src = URL.createObjectURL(this.file);
+
+    ipcRenderer.on("path", (evt, payload) => {
+      if (!payload) return;
       this.$emit("render", {
+        path: payload,
         width: this.width,
         height: this.height,
         x: this.x,
         y: this.y,
       });
-    },
-  },
-  mounted() {
-    this.$refs.video.src = URL.createObjectURL(this.file);
+    });
   },
 };
 </script>

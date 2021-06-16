@@ -1,12 +1,13 @@
 "use strict";
 
-import { app, protocol, BrowserWindow, ipcMain } from "electron";
+import { app, protocol, BrowserWindow, ipcMain, dialog } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import { spawn } from "child_process";
 import { dirname } from "path";
 import { readFile, unlink } from 'fs';
 
+let win = null;
 const isDevelopment = process.env.NODE_ENV !== "production";
 const duration_re = /Duration:([0-9]*:[0-9]*.[0-9]*.[0-9]*)/;
 const time_re = /time=([0-9]*:[0-9]*.[0-9]*.[0-9]*)/;
@@ -60,7 +61,7 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 async function createWindow() {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 1000,
     height: 600,
     minWidth: 1000,
@@ -103,21 +104,29 @@ app.on("ready", async () => {
   createWindow();
 });
 
+ipcMain.on('openDialog', (evt, payload) => {
+  dialog.showSaveDialog(win, {
+    filters: [
+      { name: 'mp4', extensions: ['mp4'] }
+    ]
+  }).then(data => {
+    evt.reply('path', data.filePath)
+  })
+})
+
 ipcMain.on("render", (evt, payload) => {
-  const { path, width, height, x, y } = payload;
+  const { inputPath, outputPath, width, height, x, y } = payload;
 
-  const random1 = Math.random().toString(36).substr(2, 11);
-  const random2 = Math.random().toString(36).substr(2, 11);
-
-  const dirPath = dirname(path);
+  const random = Math.random().toString(36).substr(2, 11);
+  const outputPathDir = dirname(outputPath);
 
   ffmpegRun(
     [
       "-i",
-      path,
+      inputPath,
       "-filter:v",
       `crop=${width}:${height}:${x}:${y}`,
-      `${dirPath}/${random1}.mp4`,
+      `${outputPathDir}/${random}.mp4`,
     ],
     (percent, eta) => {
       evt.reply("progressCrop", { percent, eta });
@@ -128,14 +137,14 @@ ipcMain.on("render", (evt, payload) => {
       ffmpegRun(
         [
           "-i",
-          `${dirPath}/${random1}.mp4`,
+          `${outputPathDir}/${random}.mp4`,
           "-i",
-          `${dirPath}/${random1}.mp4`,
+          `${outputPathDir}/${random}.mp4`,
           "-i",
-          `${dirPath}/${random1}.mp4`,
+          `${outputPathDir}/${random}.mp4`,
           "-filter_complex",
           "hstack=inputs=3",
-          `${dirPath}/${random2}.mp4`,
+          outputPath,
         ],
         (percent, eta) => {
           evt.reply("progressMerge", { percent, eta });
@@ -143,11 +152,10 @@ ipcMain.on("render", (evt, payload) => {
         () => {
           evt.reply("doneMerge");
 
-          readFile(`${dirPath}/${random2}.mp4`, (err, data) => {
+          readFile(outputPath, (err, data) => {
             evt.reply('done', data)
 
-            unlink(`${dirPath}/${random1}.mp4`)
-            unlink(`${dirPath}/${random2}.mp4`)
+            unlink(`${outputPathDir}/${random}.mp4`, () => { })
           })
         }
       );
