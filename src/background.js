@@ -4,6 +4,8 @@ import { app, protocol, BrowserWindow, ipcMain } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import { spawn } from "child_process";
+import { dirname } from "path";
+import { readFile, unlink } from 'fs';
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 const duration_re = /Duration:([0-9]*:[0-9]*.[0-9]*.[0-9]*)/;
@@ -18,7 +20,7 @@ const convert_timestamp = (time) => {
   return timestamp;
 };
 
-const ffmpegRun = (args, callback) => {
+const ffmpegRun = (args, callback, exitCallback) => {
   const process = spawn("ffmpeg", args);
 
   let duration = null;
@@ -49,6 +51,8 @@ const ffmpegRun = (args, callback) => {
       callback(percent, eta);
     }
   });
+
+  process.on("close", exitCallback);
 };
 
 protocol.registerSchemesAsPrivileged([
@@ -100,42 +104,55 @@ app.on("ready", async () => {
 });
 
 ipcMain.on("render", (evt, payload) => {
-  const { path, width, height, x, y, outputPath, outputName } = payload;
-  const random = Math.random().toString(36).substr(2, 11);
+  const { path, width, height, x, y } = payload;
+
+  const random1 = Math.random().toString(36).substr(2, 11);
+  const random2 = Math.random().toString(36).substr(2, 11);
+
+  const dirPath = dirname(path);
 
   ffmpegRun(
     [
       "-i",
       path,
       "-filter:v",
-      `"crop=${width}:${height}:${x}:${y}"`,
-      `${outputPath}/${random}.mp4`,
+      `crop=${width}:${height}:${x}:${y}`,
+      `${dirPath}/${random1}.mp4`,
     ],
     (percent, eta) => {
       evt.reply("progressCrop", { percent, eta });
+    },
+    () => {
+      evt.reply("doneCrop");
+
+      ffmpegRun(
+        [
+          "-i",
+          `${dirPath}/${random1}.mp4`,
+          "-i",
+          `${dirPath}/${random1}.mp4`,
+          "-i",
+          `${dirPath}/${random1}.mp4`,
+          "-filter_complex",
+          "hstack=inputs=3",
+          `${dirPath}/${random2}.mp4`,
+        ],
+        (percent, eta) => {
+          evt.reply("progressMerge", { percent, eta });
+        },
+        () => {
+          evt.reply("doneMerge");
+
+          readFile(`${dirPath}/${random2}.mp4`, (err, data) => {
+            evt.reply('done', data)
+
+            unlink(`${dirPath}/${random1}.mp4`)
+            unlink(`${dirPath}/${random2}.mp4`)
+          })
+        }
+      );
     }
   );
-
-  evt.reply("doneCrop");
-
-  ffmpegRun(
-    [
-      "-i",
-      `${outputPath}/${random}.mp4`,
-      "-i",
-      `${outputPath}/${random}.mp4`,
-      "-i",
-      `${outputPath}/${random}.mp4`,
-      "-filter_complex",
-      "hstack=inputs=3",
-      `${outputPath}/${outputName}.mp4`,
-    ],
-    (percent, eta) => {
-      evt.reply("progressMerge", { percent, eta });
-    }
-  );
-
-  evt.reply("doneMerge");
 });
 
 if (isDevelopment) {
