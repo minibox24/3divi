@@ -5,9 +5,11 @@ import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import installExtension, { VUEJS_DEVTOOLS } from "electron-devtools-installer";
 import { spawn } from "child_process";
 import { dirname } from "path";
-import { readFile, unlink } from 'fs';
+import { readFile, unlink } from "fs";
 
 let win = null;
+const processes = [];
+
 const isDevelopment = process.env.NODE_ENV !== "production";
 const duration_re = /Duration:([0-9]*:[0-9]*.[0-9]*.[0-9]*)/;
 const time_re = /time=([0-9]*:[0-9]*.[0-9]*.[0-9]*)/;
@@ -23,6 +25,7 @@ const convert_timestamp = (time) => {
 
 const ffmpegRun = (args, callback, exitCallback) => {
   const process = spawn("ffmpeg", args);
+  processes.push(process);
 
   let duration = null;
 
@@ -53,7 +56,10 @@ const ffmpegRun = (args, callback, exitCallback) => {
     }
   });
 
-  process.on("close", exitCallback);
+  process.on("close", () => {
+    processes.splice(processes.indexOf(process), 1);
+    exitCallback();
+  });
 };
 
 protocol.registerSchemesAsPrivileged([
@@ -104,15 +110,22 @@ app.on("ready", async () => {
   createWindow();
 });
 
-ipcMain.on('openDialog', (evt, payload) => {
-  dialog.showSaveDialog(win, {
-    filters: [
-      { name: 'mp4', extensions: ['mp4'] }
-    ]
-  }).then(data => {
-    evt.reply('path', data.filePath)
-  })
-})
+ipcMain.on("openDialog", (evt) => {
+  dialog
+    .showSaveDialog(win, {
+      filters: [{ name: "mp4", extensions: ["mp4"] }],
+    })
+    .then((data) => {
+      evt.reply("path", data.filePath);
+    });
+});
+
+ipcMain.on("kill", () => {
+  for (let i; i < processes.length; i++) {
+    const process = processes.shift();
+    process.kill("SIGINT");
+  }
+});
 
 ipcMain.on("render", (evt, payload) => {
   const { inputPath, outputPath, width, height, x, y } = payload;
@@ -153,10 +166,10 @@ ipcMain.on("render", (evt, payload) => {
           evt.reply("doneMerge");
 
           readFile(outputPath, (err, data) => {
-            evt.reply('done', data)
+            evt.reply("done", data);
 
-            unlink(`${outputPathDir}/${random}.mp4`, () => { })
-          })
+            unlink(`${outputPathDir}/${random}.mp4`, () => {});
+          });
         }
       );
     }

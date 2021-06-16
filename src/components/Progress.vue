@@ -5,6 +5,9 @@
       <b-progress-bar :value="value" :label="`${(value / 2).toFixed(2)}%`" />
     </b-progress>
     <span class="mt-1">예상 소요 시간 {{ eta }}</span>
+    <b-button v-if="false" class="mt-3" variant="danger" @click="stop"
+      >취소</b-button
+    >
   </div>
 </template>
 
@@ -55,6 +58,12 @@ export default {
       x,
       y,
     });
+  },
+  methods: {
+    stop() {
+      ipcRenderer.send("kill");
+      this.$emit("stop");
+    },
   },
 };
 </script>

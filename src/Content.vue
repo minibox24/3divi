@@ -6,6 +6,7 @@
     <Progress
       v-if="page === 3"
       @complete="complete"
+      @stop="start"
       :file="file"
       :config="config"
     />
