@@ -33,4 +33,8 @@ export default {
   height: 100vh;
   user-select: none;
 }
+
+video:focus {
+  outline: none;
+}
 </style>
