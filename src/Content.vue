@@ -3,6 +3,12 @@
     <Main v-if="page === 0" @start="start" />
     <Select v-if="page === 1" @upload="upload" />
     <Setting v-if="page === 2" @render="render" @back="start" :file="file" />
+    <Progress
+      v-if="page === 3"
+      @complate="complate"
+      :file="file"
+      :config="config"
+    />
   </div>
 </template>
 
@@ -10,13 +16,15 @@
 import Main from "./components/Main.vue";
 import Select from "./components/Select.vue";
 import Setting from "./components/Setting.vue";
+import Progress from "./components/Progress.vue";
 
 export default {
-  components: { Main, Select, Setting },
+  components: { Main, Select, Setting, Progress },
   data() {
     return {
       page: 0,
       file: null,
+      config: null,
     };
   },
   methods: {
@@ -28,8 +36,11 @@ export default {
       this.page = 2;
     },
     render(config) {
-      console.log(config);
+      this.config = config;
       this.page = 3;
+    },
+    complate() {
+      alert("end");
     },
   },
 };
