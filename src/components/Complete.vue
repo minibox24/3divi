@@ -2,10 +2,7 @@
   <div class="complete">
     <span class="info">완성!</span>
     <video class="preview mt-1" ref="video" controls />
-    <div>
-      <b-button class="act-btn" variant="success">저장하기</b-button>
-      <b-button class="act-btn" variant="danger">새로 만들기</b-button>
-    </div>
+    <b-button class="mt-2" variant="info" @click="start">새로 만들기</b-button>
   </div>
 </template>
 
@@ -14,6 +11,11 @@ export default {
   props: ["blob"],
   mounted() {
     this.$refs.video.src = URL.createObjectURL(this.blob);
+  },
+  methods: {
+    start() {
+      this.$emit("start");
+    },
   },
 };
 </script>
@@ -37,9 +39,5 @@ export default {
   background: black;
   width: 640px;
   height: 360px;
-}
-
-.act-btn {
-  margin: 0.5rem;
 }
 </style>

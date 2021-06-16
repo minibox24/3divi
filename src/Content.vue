@@ -9,7 +9,7 @@
       :file="file"
       :config="config"
     />
-    <Complete v-if="page === 4" @back="start" :blob="blob" />
+    <Complete v-if="page === 4" @start="start" :blob="blob" />
   </div>
 </template>
 
